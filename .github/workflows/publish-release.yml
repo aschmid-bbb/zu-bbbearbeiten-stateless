@@ -23,5 +23,10 @@ jobs:
           python_ver: '3.11'
           spec: 'main.spec'
           requirements: 'requirements.txt'
-          upload_exe_with_name: 'zu-bbbearbeiten'
+          upload_exe_with_name: 'main.exe'
           options: --onefile, --name "Zu Bbbearbeiten Stateless", --windowed,
+      - name: Upload
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run:
+          gh release upload ${{ github.ref_name }} ./dist/main.exe
