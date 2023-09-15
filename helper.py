@@ -30,3 +30,35 @@ def get(index):
 
 def update(index):
     items[index].isCompleted = not items[index].isCompleted
+
+
+def get_csv():
+    csv = []
+    csv.append(
+        join_line([add_quotes("text"), add_quotes("date"), add_quotes("isCompleted")])
+    )
+    for item in items:
+        csv.append(get_item_csv(item))
+    return "\n".join(csv)
+
+
+def join_line(line):
+    return ",".join(line)
+
+
+def get_item_csv(item):
+    return join_line(
+        [
+            add_quotes(escape_quotes(item.text)),
+            add_quotes(item.date.isoformat()),
+            add_quotes(str(item.isCompleted)),
+        ]
+    )
+
+
+def add_quotes(input):
+    return '"' + input + '"'
+
+
+def escape_quotes(input):
+    return input.replace('"', '""')
