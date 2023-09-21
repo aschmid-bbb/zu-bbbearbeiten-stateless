@@ -13,15 +13,15 @@ jobs:
       contents: write
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Publish release
-      id: publish-release
-      uses: ghalactic/github-release-from-tag@v5
-      with:
-         prerelease: "false"
-         reactions: heart,rocket,eyes
+      - name: Publish release
+        id: publish-release
+        uses: ghalactic/github-release-from-tag@v5
+        with:
+          prerelease: "false"
+          reactions: heart,rocket,eyes
 
   executable:
     runs-on: windows-latest
@@ -30,19 +30,36 @@ jobs:
       contents: write
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Create Executable
-      uses: sayyid5416/pyinstaller@v1
-      with:
-        python_ver: '3.11'
-        spec: 'main.spec'
-        requirements: 'requirements.txt'
-        upload_exe_with_name: 'zu-bbbearbeiten.exe'
+      - name: Create Executable
+        uses: sayyid5416/pyinstaller@v1
+        with:
+          python_ver: "3.11"
+          spec: "main.spec"
+          requirements: "requirements.txt"
+          upload_exe_with_name: "zu-bbbearbeiten.exe"
 
-    - name: Upload Release Asset
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run:
-        gh release upload ${{ github.ref_name }} ./dist/main.exe
+      - name: Upload Release Asset
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload ${{ github.ref_name }} ./dist/main.exe
+
+  docker-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Docker tag
+        run: docker tag flask-app ghcr.io/aschmid-bbb/zu-bbbearbeiten-stateless/flask-app:latest
+
+      - name: Docker push
+        run: docker push ghcr.io/aschmid-bbb/zu-bbbearbeiten-stateless/flask-app:latest
