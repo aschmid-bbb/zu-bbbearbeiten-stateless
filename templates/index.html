@@ -14,41 +14,50 @@
     <div style="margin-top: 50px;" class="ui container">
         <h1 class="ui center aligned header">Zu Bbbearbeiten</h1>
         <div class="ui divider" />
-        <div class="ui segment"><a href="/download">CSV Herunterladen</a></div>
-        <form name="item" class="ui form" action="/add" method="post">
-            <div class="field" style="margin-top: 10px;">
-                <div for="text" class="ui pointing below label">Was gibbbt es zu tun?</div>
-                <div class="ui action input">
-                    <input autofocus name="text" type="text" name="text" placeholder="Fürs Modul lernen...">
-                    <button class="ui blue button" type="submit">Hinzufügen</button>
-                </div>
-            </div>
+    </div>
 
-        </form>
+    <form name="item" class="ui container form" action="/add" method="post">
+        <div for="text" class="ui pointing below label" style="margin-top: 0.5em">Was gibbbt es zu tun?</div>
+        <input autofocus class="ui fluid input focus" name="text" type="text" id="text"
+            placeholder="Fürs Modul lernen...">
+        <div for="description" class="ui pointing below label" style="margin-top: 0.5em">Was genau?</div>
+        <textarea type="text" name="description" id="description" rows="2"></textarea>
+        <div for="text" class="ui pointing below label" style="margin-top: 0.5em">Zu welcher
+            Kategorie gehört es?
+        </div>
+        <select class="ui fluid input" id="category" name="category">
+            <option value="Hausaufgaben">Hausaufgaben</option>
+            <option value="Kunst">Kunst</option>
+            <option value="Hausarbeit">Hausarbeit</option>
+            <option value="Musse">Musse</option>
+        </select>
+        <div for="text" class="ui pointing below label" style="margin-top: 1em">Wann muss es fertig sein?
+        </div>
+        <div class="ui fluid input action">
+            <input type="date" id="deadline" name="deadline" value="2024-01-01">
+            <button class="ui blue button" type="submit">Hinzufügen</button>
+        </div>
+    </form>
 
+    <div class="ui container" style="margin-top: 2em">
+        <h1 class="ui center aligned header">Zu Bbbearbeiten</h1>
+        <div class="ui divider" />
         {% for item in items %}
-        <div class="ui segment" style="overflow:hidden; position: relative">
+        <div class="ui raised segment" style="overflow:hidden; margin-top: 1em">
+            <span class="ui black left label"><i class="calendar icon"></i>{{item.date.strftime("%d.%m.%Y")}}</span>
+            <span class="ui black left label"><i class="folder open icon"></i>{{item.category}}</span>
             <span class="ui header" style="margin-left: 0.5em;">{{item.text}}</span>
+            <span class>{{item.description}}</span>
+
             {% if item.isCompleted %}
-            <a class="ui green left corner label" href="/update/{{loop.index0}}"><i
+            <a class="ui green left corner label" href="/update/{{item.id}}"><i
                     class="check square outline icon"></i></a>
             {% else %}
-            <a class="ui red left corner label" href="/update/{{loop.index0}}"><i
-                    class="square outline icon icon"></i></a>
+            <a class="ui red left corner label" href="/update/{{item.id}}"><i class="square outline icon icon"></i></a>
             {% endif %}
         </div>
         {% endfor %}
+
+        <a href="/getCSV"><button class="ui fluid primary button"><i class="icon download"></i>Download</button></a>
     </div>
-
-    <script type="text/javascript">
-
-        $(document).ready(function () {
-
-            document.item.text.focus();
-
-        });
-
-    </script>
-
-
 </html>

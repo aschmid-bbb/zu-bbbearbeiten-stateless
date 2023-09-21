@@ -1,64 +1,78 @@
-from datetime import date
-from dataclasses import dataclass
-import operator
-
-items = []
-
-today_str = date.today().isoformat()
+import datetime
+import io
+import csv
+from flask_sqlalchemy import SQLAlchemy
+from database import db
 
 
-@dataclass
-class Item:
-    text: str
-    date: date
-    isCompleted: bool = False
-
-
-def add(text, date_str=today_str):
-    text = text.replace("b", "bbb").replace("B", "Bbb")
-    items.append(Item(text, date.fromisoformat(date_str)))
-    items.sort(key=operator.attrgetter("date"))
-
-
-def get_all():
-    return items
-
-
-def get(index):
-    return items[index]
-
-
-def update(index):
-    items[index].isCompleted = not items[index].isCompleted
+class Item(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    text = db.Column(db.String)
+    date = db.Column(db.DateTime)
+    category = db.Column(db.String)
+    description = db.Column(db.String)
+    isCompleted = db.Column(db.Boolean, default=False)
 
 
 def get_csv():
-    csv = []
-    csv.append(
-        join_line([add_quotes("text"), add_quotes("date"), add_quotes("isCompleted")])
-    )
-    for item in items:
-        csv.append(get_item_csv(item))
-    return "\n".join(csv)
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["Titel", "Datum", "Kategorie", "Beschreibung", "Erledigt?"])
+    for item in Item.query.all():
+        writer.writerow(
+            [
+                item.text,
+                item.date.strftime("%d.%m.%Y"),
+                item.category,
+                item.description,
+                "x" if item.isCompleted else "o",
+            ]
+        )
+    return output.getvalue()
 
 
-def join_line(line):
-    return ",".join(line)
+def oneWeekFromToday():
+    today = datetime.datetime.now()
+    oneWeek = datetime.timedelta(weeks=1)
+    return today + oneWeek
 
 
-def get_item_csv(item):
-    return join_line(
-        [
-            add_quotes(escape_quotes(item.text)),
-            add_quotes(item.date.isoformat()),
-            add_quotes(str(item.isCompleted)),
+def add(text, date=None, category=None, description=None):
+    text = text.replace("b", "bbb").replace("B", "Bbb")
+    if date is None:
+        date = oneWeekFromToday()
+    else:
+        date = datetime.datetime.strptime(date, "%Y-%m-%d")
+
+    if category is None:
+        category = "default"
+
+    if description is None:
+        description = ""
+
+    item = Item(text=text, date=date, category=category, description=description)
+    db.session.add(item)
+    db.session.commit()
+
+
+def get_all(sorted=False):
+    if sorted:
+        return [
+            item for item in Item.query.order_by(Item.date.asc(), Item.category.desc())
         ]
+    else:
+        return Item.query.all()
+
+
+def get(id):
+    return Item.query.get(id)
+
+
+def update(id):
+    item = db.session.query(Item).get(id)
+    isCompleted = db.session.query(Item).get(id).isCompleted
+    print(item, isCompleted)
+    db.session.query(Item).filter(Item.id == id).update(
+        {Item.isCompleted: not isCompleted}
     )
-
-
-def add_quotes(input):
-    return '"' + input + '"'
-
-
-def escape_quotes(input):
-    return input.replace('"', '""')
+    db.session.commit()
