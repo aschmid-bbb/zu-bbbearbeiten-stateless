@@ -118,4 +118,4 @@ jobs:
         with:
           app-name: "bbb-todo-with-db"
           slot-name: "production"
-          publish-profile: ${{ secrets.AzureAppService_PublishProfile_11dbf92a93584de289c05f682c74c6d9 }}
+          publish-profile: ${{ secrets.AzureAppService_PublishProfile_EF20CC83CE164C659921082B1212FB90 }}
